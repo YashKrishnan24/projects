@@ -1,29 +1,24 @@
+# Glassmorphism Email Submission Page
 
-# project-1
-Hello there!
-This is my first Container technologies assignment.
-What is Container Technology?
+A clean, mobile-first email submission UI built using **HTML, CSS, and JavaScript**, featuring a modern **glassmorphism design**.  
+The project focuses on simplicity, smooth user experience, and responsive layout.
 
-Container technology allows you to package an application along with everything it needs (code, runtime, libraries, configs) into a single unit called a container.
+## ✨ Features
 
-👉 The app runs the same way everywhere — laptop, server, or cloud.
+- Mobile-first responsive design
+- Glassmorphism UI (blur, transparency, soft borders)
+- Floating label email input
+- Minimal animations and micro-interactions
+- Client-side email validation
+- Lightweight and fast (no frameworks)
 
-Why Containers Exist
+## 🛠 Tech Stack
 
-Before containers:
+- HTML5
+- CSS3 (Flexbox, Media Queries)
+- Vanilla JavaScript
 
-Apps worked on my machine but failed on servers
+## 📱 Design Approach
 
-Dependency conflicts
-
-Heavy virtual machines
-
-Containers solve this by being:
-
-Lightweight
-
-Fast to start
-
-Portable
-
-Consistent across environments
+The interface is designed **mobile-first**, ensuring usability on small screens before scaling up for tablets and desktops.  
+Glassmorphism is implemented using `backdrop-filter`, subtle gradients, and soft shadows to create a modern, premium look.
