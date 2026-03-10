@@ -1,3 +1,4 @@
+Hello there!
 🎨 Project 1: Glassmorphism Email Submission
 A sleek, mobile-first UI focused on modern transparency and fluid UX.
 
