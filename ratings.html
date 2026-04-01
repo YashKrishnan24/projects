@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dehradun Eats — Rate Your Experience</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #F5A623;
+    --gold2: #FFD166;
+    --deep: #1A0A2E;
+    --accent: #E84393;
+    --teal: #06D6A0;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.1);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: #0D0618;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    cursor: default;
+  }
+
+  /* Custom cursor */
+  body { cursor: none; }
+  #cursor {
+    width: 18px; height: 18px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease, background 0.2s, border-color 0.2s, width 0.2s, height 0.2s;
+    mix-blend-mode: difference;
+  }
+  #cursor.hovered {
+    width: 40px; height: 40px;
+    background: rgba(245,166,35,0.15);
+    border-color: var(--gold2);
+  }
+
+  /* Background orbs */
+  .bg-orbs {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(90px); opacity: 0.28;
+    animation: floatOrb 9s ease-in-out infinite alternate;
+  }
+  .orb1 { width: 500px; height: 500px; background: #5B21B6; top: -150px; left: -120px; animation-delay: 0s; }
+  .orb2 { width: 350px; height: 350px; background: #E84393; top: 38%; right: -100px; animation-delay: -3.5s; }
+  .orb3 { width: 300px; height: 300px; background: #06D6A0; bottom: -60px; left: 28%; animation-delay: -6s; }
+  .orb4 { width: 200px; height: 200px; background: #F5A623; top: 60%; left: 5%; animation-delay: -2s; opacity: 0.18; }
+
+  @keyframes floatOrb {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(40px, 50px) scale(1.12); }
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.03; pointer-events: none;
+  }
+
+  /* Layout */
+  .container {
+    position: relative; z-index: 1;
+    max-width: 860px; margin: 0 auto;
+    padding: 50px 24px 80px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center; margin-bottom: 56px;
+    animation: fadeSlideDown 0.9s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  .header-tag {
+    display: inline-block;
+    font-size: 11px; font-weight: 500; letter-spacing: 3.5px; text-transform: uppercase;
+    color: var(--gold2);
+    border: 1px solid rgba(245,166,35,0.3);
+    border-radius: 24px; padding: 7px 22px; margin-bottom: 22px;
+    background: rgba(245,166,35,0.07);
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5.5vw, 3.6rem);
+    font-weight: 900; line-height: 1.08;
+    background: linear-gradient(135deg, #fff 0%, var(--gold2) 48%, var(--gold) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+
+  .subtitle {
+    font-size: 15px; color: rgba(255,255,255,0.45);
+    font-weight: 300; letter-spacing: 0.2px;
+  }
+
+  /* Divider */
+  .divider {
+    display: flex; align-items: center; gap: 16px;
+    margin: 0 0 40px;
+  }
+  .divider-line { flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+  .divider-icon { font-size: 18px; opacity: 0.5; }
+
+  /* Restaurant Cards Grid */
+  .restaurants-grid { display: grid; gap: 22px; }
+
+  .rest-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 22px;
+    padding: 26px 30px;
+    position: relative; overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.38s cubic-bezier(0.22,1,0.36,1),
+                border-color 0.3s, box-shadow 0.35s;
+    animation: fadeSlideUp 0.7s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  .rest-card::before {
+    content: ''; position: absolute;
+    top: 0; left: -120%; width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.045), transparent);
+    transition: left 0.55s ease; pointer-events: none;
+  }
+  .rest-card:hover::before { left: 160%; }
+
+  .rest-card:hover {
+    transform: translateY(-6px) scale(1.005);
+    border-color: rgba(245,166,35,0.4);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.45), 0 0 50px rgba(245,166,35,0.07);
+  }
+
+  /* Card accent line */
+  .rest-card::after {
+    content: ''; position: absolute;
+    top: 0; left: 0; width: 4px; height: 0;
+    border-radius: 22px 0 0 22px;
+    transition: height 0.4s cubic-bezier(0.22,1,0.36,1);
+  }
+  .rest-card:hover::after { height: 100%; }
+
+  .rest-header {
+    display: flex; align-items: flex-start; gap: 18px; margin-bottom: 20px;
+  }
+
+  .rest-emoji {
+    width: 56px; height: 56px; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; flex-shrink: 0;
+    position: relative; overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .rest-card:hover .rest-emoji { transform: rotate(-8deg) scale(1.1); }
+
+  .rest-info { flex: 1; min-width: 0; }
+
+  .rest-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.18rem; font-weight: 700;
+    margin-bottom: 6px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .rest-meta {
+    font-size: 12px; color: rgba(255,255,255,0.38);
+    display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  }
+  .rest-meta span { display: flex; align-items: center; gap: 5px; }
+
+  .cuisine-tag {
+    font-size: 11px; padding: 4px 12px;
+    border-radius: 12px; font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  .reviews-count {
+    font-size: 11px; color: rgba(255,255,255,0.3);
+    margin-left: auto;
+  }
+
+  /* Star Rating */
+  .star-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+  }
+
+  .stars { display: flex; gap: 7px; }
+
+  .star {
+    width: 34px; height: 34px; cursor: pointer; position: relative;
+    transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    user-select: none;
+  }
+
+  .star svg { width: 100%; height: 100%; display: block; }
+  .star:hover { transform: scale(1.35) rotate(-6deg); }
+
+  .star.pop { animation: starPop 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes starPop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.6) rotate(12deg); }
+    100% { transform: scale(1); }
+  }
+
+  .rating-label {
+    font-size: 13px; font-weight: 500;
+    color: rgba(255,255,255,0.4);
+    transition: color 0.3s, transform 0.3s;
+    min-width: 110px;
+  }
+
+  /* Progress Bar */
+  .progress-bar {
+    height: 3px; background: rgba(255,255,255,0.06);
+    border-radius: 3px; margin-bottom: 6px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 0%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--accent));
+    transition: width 0.5s cubic-bezier(0.22,1,0.36,1);
+  }
+
+  /* Feedback Textarea */
+  .feedback-area {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 14px;
+    width: 100%; padding: 14px 18px;
+    color: #fff; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; resize: none; height: 82px;
+    transition: border-color 0.3s, background 0.3s, height 0.35s, opacity 0.3s;
+    outline: none;
+    display: none; opacity: 0;
+    margin-top: 16px;
+  }
+  .feedback-area.visible { display: block; }
+  .feedback-area:focus {
+    border-color: rgba(245,166,35,0.45);
+    background: rgba(255,255,255,0.06);
+    height: 114px;
+  }
+  .feedback-area::placeholder { color: rgba(255,255,255,0.22); }
+
+  /* Submit Button */
+  .submit-btn {
+    margin-top: 14px; display: none; opacity: 0;
+    padding: 11px 26px; border-radius: 50px;
+    border: none; cursor: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500; letter-spacing: 0.6px;
+    background: linear-gradient(135deg, var(--gold), var(--accent));
+    color: #fff;
+    transition: transform 0.22s, box-shadow 0.22s, opacity 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .submit-btn.visible { display: inline-block; }
+  .submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(232,67,147,0.4);
+  }
+  .submit-btn:active { transform: scale(0.97); }
+
+  .submit-btn .btn-ripple {
+    position: absolute; border-radius: 50%;
+    background: rgba(255,255,255,0.28);
+    transform: scale(0); animation: btnRipple 0.6s linear;
+    pointer-events: none;
+  }
+  @keyframes btnRipple { to { transform: scale(4); opacity: 0; } }
+
+  /* Confirmation Overlay */
+  .confirm-overlay {
+    position: absolute; inset: 0; border-radius: 22px;
+    background: rgba(10,4,20,0.94);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 12px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s;
+    backdrop-filter: blur(8px);
+  }
+  .confirm-overlay.show { opacity: 1; pointer-events: all; }
+
+  .confirm-icon {
+    width: 58px; height: 58px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), #06A8D6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    animation: popIn 0.55s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes popIn {
+    from { transform: scale(0) rotate(-25deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0);      opacity: 1; }
+  }
+
+  .confirm-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem; font-weight: 700;
+    background: linear-gradient(135deg, #fff, var(--teal));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .confirm-sub { font-size: 12px; color: rgba(255,255,255,0.38); }
+
+  /* Ripple on card */
+  .ripple {
+    position: absolute; border-radius: 50%;
+    background: rgba(245,166,35,0.12);
+    transform: scale(0);
+    animation: rippleAnim 0.65s linear;
+    pointer-events: none; z-index: 0;
+  }
+  @keyframes rippleAnim { to { transform: scale(5); opacity: 0; } }
+
+  /* Summary Panel */
+  .summary-panel {
+    margin-top: 44px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 22px; padding: 30px 32px;
+    animation: fadeSlideUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.5s both;
+  }
+
+  .summary-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.22rem; font-weight: 700;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .summary-row {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .summary-name {
+    font-size: 13px; font-weight: 500; width: 160px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .bar-track {
+    flex: 1; height: 8px; background: rgba(255,255,255,0.06);
+    border-radius: 8px; overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%; border-radius: 8px; width: 0%;
+    transition: width 1.1s cubic-bezier(0.22,1,0.36,1);
+  }
+
+  .summary-score {
+    font-size: 13px; font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    min-width: 36px; text-align: right;
+  }
+
+  .summary-stars {
+    display: flex; gap: 2px; min-width: 70px;
+  }
+  .sum-star { font-size: 11px; }
+
+  /* City stats */
+  .city-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 14px; margin-top: 28px;
+  }
+
+  .stat-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px; padding: 16px;
+    text-align: center;
+  }
+  .stat-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem; font-weight: 900;
+    background: linear-gradient(135deg, var(--gold2), var(--gold));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-lbl { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* Floating particles */
+  .particle {
+    position: fixed; pointer-events: none; z-index: 9998;
+    border-radius: 50%;
+    animation: particleFly var(--dur) ease-out forwards;
+  }
+  @keyframes particleFly {
+    0%   { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: rgba(255,255,255,0.08); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 50px; padding: 12px 28px;
+    font-size: 14px; font-weight: 500;
+    color: #fff; z-index: 9990;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+    pointer-events: none; opacity: 0;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* Animations */
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-35px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(35px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(245,166,35,0.3); border-radius: 6px; }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    .rest-card { padding: 20px 18px; }
+    .city-stats { grid-template-columns: 1fr 1fr; }
+    .star { width: 29px; height: 29px; }
+    #cursor { display: none; }
+    body { cursor: default; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div id="cursor"></div>
+
+<!-- Background -->
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="orb orb4"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-tag">🍽️ &nbsp;Dehradun Eats</div>
+    <h1>Rate Your Dining<br>Experience</h1>
+    <p class="subtitle">Share your honest thoughts — help others discover the city's finest</p>
+  </div>
+
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-icon">✦</div>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- Restaurant Cards -->
+  <div class="restaurants-grid" id="restaurantsGrid"></div>
+
+  <!-- Summary Panel -->
+  <div class="summary-panel" id="summaryPanel">
+    <div class="summary-title">📊 &nbsp;Live City Ratings</div>
+    <div id="summaryRows"></div>
+    <div class="city-stats" id="cityStats"></div>
+  </div>
+
+</div>
+
+<script>
+/* ===== Data ===== */
+const restaurants = [
+  { id:1, name:"Maplewood Bistro",   cuisine:"Continental", emoji:"🥩", color:"#E05C5C", bg:"rgba(224,92,92,0.16)",   barGrad:"linear-gradient(90deg,#C0392B,#E74C3C)" },
+  { id:2, name:"Sakura Garden",      cuisine:"Japanese",    emoji:"🍣", color:"#E84393", bg:"rgba(232,67,147,0.14)", barGrad:"linear-gradient(90deg,#E84393,#FF6EB4)" },
+  { id:3, name:"Spice Route",        cuisine:"Indian",      emoji:"🍛", color:"#F5A623", bg:"rgba(245,166,35,0.14)",  barGrad:"linear-gradient(90deg,#F5A623,#FFD166)" },
+  { id:4, name:"La Bella Vita",      cuisine:"Italian",     emoji:"🍕", color:"#06D6A0", bg:"rgba(6,214,160,0.11)",   barGrad:"linear-gradient(90deg,#06D6A0,#06A8D6)" },
+  { id:5, name:"Dragon Palace",      cuisine:"Chinese",     emoji:"🥟", color:"#9B59B6", bg:"rgba(155,89,182,0.14)", barGrad:"linear-gradient(90deg,#9B59B6,#C39BD3)" },
+];
+
+const ratingLabels   = ["","Terrible 😤","Poor 😕","Average 🙂","Great 😋","Outstanding 🤩"];
+const ratingColors   = ["","#E84393","#F5A623","#FFD166","#06D6A0","#06D6A0"];
+const particleColors = ["#F5A623","#FFD166","#E84393","#06D6A0","#fff","#9B59B6"];
+
+/* ===== State ===== */
+const state = {};
+restaurants.forEach(r => {
+  state[r.id] = { selected: 0, totalScore: 0, reviews: 0 };
+});
+
+/* ===== Cursor ===== */
+const cur = document.getElementById('cursor');
+let mx = 0, my = 0, cx = 0, cy = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function animCursor() {
+  cx += (mx - cx) * 0.14;
+  cy += (my - cy) * 0.14;
+  cur.style.left = cx + 'px';
+  cur.style.top  = cy + 'px';
+  requestAnimationFrame(animCursor);
+})();
+document.querySelectorAll('button, .star, a, textarea').forEach(el => {
+  el.addEventListener('mouseenter', () => cur.classList.add('hovered'));
+  el.addEventListener('mouseleave', () => cur.classList.remove('hovered'));
+});
+
+/* ===== Build Cards ===== */
+function buildCards() {
+  const grid = document.getElementById('restaurantsGrid');
+  restaurants.forEach((r, i) => {
+    const card = document.createElement('div');
+    card.className = 'rest-card';
+    card.id = `card-${r.id}`;
+    card.style.animationDelay = `${i * 0.1}s`;
+    card.style.setProperty('--accent-color', r.color);
+
+    // Card accent line colour
+    const style = document.createElement('style');
+    style.textContent = `#card-${r.id}::after { background: ${r.barGrad}; }`;
+    document.head.appendChild(style);
+
+    card.innerHTML = `
+      <!-- Confirm overlay -->
+      <div class="confirm-overlay" id="confirm-${r.id}">
+        <div class="confirm-icon">✓</div>
+        <div class="confirm-text">Thank you!</div>
+        <div class="confirm-sub">Your feedback is now live</div>
+      </div>
+
+      <!-- Header -->
+      <div class="rest-header">
+        <div class="rest-emoji" style="background:${r.bg};" id="emoji-${r.id}">${r.emoji}</div>
+        <div class="rest-info">
+          <div class="rest-name">${r.name}</div>
+          <div class="rest-meta">
+            <span>📍 Dehradun</span>
+            <span class="cuisine-tag" style="background:${r.bg};color:${r.color};">${r.cuisine}</span>
+            <span class="reviews-count" id="rc-${r.id}">No reviews yet</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stars -->
+      <div class="star-row">
+        <div class="stars" id="stars-${r.id}">
+          ${[1,2,3,4,5].map(n => `
+            <div class="star" data-rid="${r.id}" data-val="${n}" id="star-${r.id}-${n}"
+                 onmouseenter="previewStars(${r.id},${n})"
+                 onmouseleave="resetPreview(${r.id})"
+                 onclick="rate(${r.id},${n},this)">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                  stroke="rgba(255,255,255,0.18)" stroke-width="1.5"
+                  fill="rgba(255,255,255,0.05)"
+                  class="star-path" id="sp-${r.id}-${n}"
+                  style="transition: fill 0.2s, stroke 0.2s;"/>
+              </svg>
+            </div>`).join('')}
+        </div>
+        <div class="rating-label" id="lbl-${r.id}">Tap to rate</div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-bar"><div class="progress-fill" id="prog-${r.id}"></div></div>
+
+      <!-- Feedback -->
+      <textarea class="feedback-area" id="fb-${r.id}"
+        placeholder="Tell us more about your visit… (optional)"></textarea>
+
+      <!-- Submit -->
+      <button class="submit-btn" id="btn-${r.id}" onclick="submit(${r.id},this)">
+        Submit Feedback &nbsp;✦
+      </button>
+    `;
+    grid.appendChild(card);
+
+    /* Ripple on card */
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('.star,.submit-btn,.feedback-area,.confirm-overlay')) return;
+      const rect = this.getBoundingClientRect();
+      const rip = document.createElement('span');
+      rip.className = 'ripple';
+      const size = Math.max(rect.width, rect.height);
+      rip.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+      this.appendChild(rip);
+      setTimeout(() => rip.remove(), 800);
+    });
+  });
+}
+
+/* ===== Star Preview ===== */
+function previewStars(rid, upTo) {
+  const sel = state[rid].selected;
+  for (let n = 1; n <= 5; n++) {
+    const p = document.getElementById(`sp-${rid}-${n}`);
+    if (n <= upTo) {
+      p.style.fill   = n <= sel ? '#F5A623' : 'rgba(245,166,35,0.38)';
+      p.style.stroke = '#F5A623';
+    } else if (n > upTo && n > sel) {
+      p.style.fill   = 'rgba(255,255,255,0.05)';
+      p.style.stroke = 'rgba(255,255,255,0.18)';
+    }
+  }
+}
+
+function resetPreview(rid) {
+  const sel = state[rid].selected;
+  for (let n = 1; n <= 5; n++) {
+    const p = document.getElementById(`sp-${rid}-${n}`);
+    if (n <= sel) {
+      p.style.fill   = '#F5A623';
+      p.style.stroke = '#F5A623';
+    } else {
+      p.style.fill   = 'rgba(255,255,255,0.05)';
+      p.style.stroke = 'rgba(255,255,255,0.18)';
+    }
+  }
+}
+
+/* ===== Rate ===== */
+function rate(rid, val, el) {
+  state[rid].selected = val;
+
+  /* Fill stars */
+  for (let n = 1; n <= 5; n++) {
+    const p   = document.getElementById(`sp-${rid}-${n}`);
+    const str = document.getElementById(`star-${rid}-${n}`);
+    if (n <= val) {
+      p.style.fill   = '#F5A623';
+      p.style.stroke = '#F5A623';
+      str.classList.remove('pop');
+      void str.offsetWidth;
+      str.classList.add('pop');
+      setTimeout(() => str.classList.remove('pop'), 400);
+    } else {
+      p.style.fill   = 'rgba(255,255,255,0.05)';
+      p.style.stroke = 'rgba(255,255,255,0.18)';
+    }
+  }
+
+  /* Label */
+  const lbl = document.getElementById(`lbl-${rid}`);
+  lbl.textContent  = ratingLabels[val];
+  lbl.style.color  = ratingColors[val];
+
+  /* Progress bar */
+  document.getElementById(`prog-${rid}`).style.width = `${(val/5)*100}%`;
+
+  /* Show textarea & button */
+  const fb  = document.getElementById(`fb-${rid}`);
+  const btn = document.getElementById(`btn-${rid}`);
+  fb.classList.add('visible');
+  setTimeout(() => { fb.style.opacity = '1'; }, 20);
+  btn.classList.add('visible');
+  setTimeout(() => { btn.style.opacity = '1'; }, 40);
+
+  /* Particles */
+  spawnParticles(el);
+}
+
+/* ===== Submit ===== */
+function submit(rid, btnEl) {
+  const s = state[rid];
+  if (!s.selected) return;
+
+  /* Btn ripple */
+  const r   = btnEl.getBoundingClientRect();
+  const rip = document.createElement('span');
+  rip.className = 'btn-ripple';
+  rip.style.cssText = `width:${r.width}px;height:${r.width}px;left:0;top:${r.height/2 - r.width/2}px;`;
+  btnEl.appendChild(rip);
+  setTimeout(() => rip.remove(), 700);
+
+  /* Update state */
+  s.totalScore += s.selected;
+  s.reviews++;
+
+  /* Confirm overlay */
+  const overlay = document.getElementById(`confirm-${rid}`);
+  overlay.classList.add('show');
+  spawnParticlesAt(document.getElementById(`emoji-${rid}`), 20);
+
+  /* Toast */
+  showToast(`🌟 Rated ${restaurants.find(x=>x.id===rid).name} — ${ratingLabels[s.selected]}`);
+
+  /* Reset card after delay */
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    s.selected = 0;
+    resetPreview(rid);
+    document.getElementById(`lbl-${rid}`).textContent = 'Tap to rate';
+    document.getElementById(`lbl-${rid}`).style.color  = 'rgba(255,255,255,0.4)';
+    document.getElementById(`prog-${rid}`).style.width = '0%';
+    const fb  = document.getElementById(`fb-${rid}`);
+    const btn = document.getElementById(`btn-${rid}`);
+    fb.style.opacity  = '0';
+    btn.style.opacity = '0';
+    setTimeout(() => {
+      fb.classList.remove('visible'); fb.value = '';
+      btn.classList.remove('visible');
+    }, 320);
+    /* Update reviews count */
+    const rc  = document.getElementById(`rc-${rid}`);
+    const avg = (s.totalScore / s.reviews).toFixed(1);
+    rc.textContent = `${s.reviews} review${s.reviews > 1 ? 's' : ''} · ★ ${avg}`;
+    updateSummary();
+  }, 2700);
+}
+
+/* ===== Particles ===== */
+function spawnParticles(el) {
+  const rect = el.getBoundingClientRect();
+  spawnParticlesAt(el, 12);
+}
+
+function spawnParticlesAt(el, count) {
+  const rect = el.getBoundingClientRect();
+  const cx   = rect.left + rect.width  / 2;
+  const cy   = rect.top  + rect.height / 2;
+  for (let i = 0; i < count; i++) {
+    const p    = document.createElement('div');
+    p.className = 'particle';
+    const size  = Math.random() * 9 + 4;
+    const ang   = (Math.random() * 360) * Math.PI / 180;
+    const dist  = Math.random() * 90 + 50;
+    const dur   = (Math.random() * 0.4 + 0.5).toFixed(2) + 's';
+    const col   = particleColors[Math.floor(Math.random() * particleColors.length)];
+    p.style.cssText = `
+      width:${size}px;height:${size}px;
+      left:${cx}px;top:${cy}px;
+      background:${col};
+      --tx:${(Math.cos(ang)*dist).toFixed(0)}px;
+      --ty:${(Math.sin(ang)*dist).toFixed(0)}px;
+      --dur:${dur};
+    `;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1100);
+  }
+}
+
+/* ===== Toast ===== */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ===== Summary Panel ===== */
+function buildSummary() {
+  const rows = document.getElementById('summaryRows');
+  rows.innerHTML = restaurants.map((r, i) => `
+    <div class="summary-row">
+      <div class="summary-name">${r.emoji} ${r.name}</div>
+      <div class="bar-track">
+        <div class="bar-fill" id="sbar-${r.id}" style="background:${r.barGrad};"></div>
+      </div>
+      <div class="summary-stars" id="sstars-${r.id}">
+        ${[1,2,3,4,5].map(() => `<span class="sum-star" style="color:rgba(255,255,255,0.15);">★</span>`).join('')}
+      </div>
+      <div class="summary-score" id="sscore-${r.id}">—</div>
+    </div>
+  `).join('');
+
+  buildCityStats();
+}
+
+function buildCityStats() {
+  document.getElementById('cityStats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-val" id="stat-reviews">0</div>
+      <div class="stat-lbl">Total Reviews</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="stat-avg">—</div>
+      <div class="stat-lbl">City Average</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="stat-top">—</div>
+      <div class="stat-lbl">Top Rated</div>
+    </div>
+  `;
+}
+
+function updateSummary() {
+  let totalReviews = 0, totalScore = 0, topR = null, topAvg = 0;
+
+  restaurants.forEach(r => {
+    const s   = state[r.id];
+    const avg = s.reviews ? s.totalScore / s.reviews : 0;
+
+    document.getElementById(`sbar-${r.id}`).style.width = `${(avg/5)*100}%`;
+    document.getElementById(`sscore-${r.id}`).textContent = s.reviews ? avg.toFixed(1) : '—';
+
+    const starsEl = document.getElementById(`sstars-${r.id}`);
+    starsEl.innerHTML = [1,2,3,4,5].map(n => {
+      const col = n <= Math.round(avg) ? '#F5A623' : 'rgba(255,255,255,0.15)';
+      return `<span class="sum-star" style="color:${col};">★</span>`;
+    }).join('');
+
+    totalReviews += s.reviews;
+    totalScore   += s.totalScore;
+    if (avg > topAvg && s.reviews > 0) { topAvg = avg; topR = r; }
+  });
+
+  document.getElementById('stat-reviews').textContent = totalReviews;
+  document.getElementById('stat-avg').textContent     = totalReviews ? (totalScore/totalReviews).toFixed(1) : '—';
+  document.getElementById('stat-top').textContent     = topR ? topR.emoji : '—';
+}
+
+/* ===== Init ===== */
+buildCards();
+buildSummary();
+
+/* Re-attach cursor hover after cards built */
+setTimeout(() => {
+  document.querySelectorAll('.star, .submit-btn, .feedback-area').forEach(el => {
+    el.addEventListener('mouseenter', () => cur.classList.add('hovered'));
+    el.addEventListener('mouseleave', () => cur.classList.remove('hovered'));
+  });
+}, 100);
+</script>
+</body>
+</html>
