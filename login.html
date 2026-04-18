@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus | Portal Login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #00f0ff;
+            --primary-hover: #00c3ff;
+            --bg-dark: #0a0a10;
+            --text-main: #ffffff;
+            --text-muted: #8b8b9f;
+            --glass-bg: rgba(20, 20, 30, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            color: var(--text-main);
+        }
+
+        /* Background Animations */
+        .ambient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, transparent 70%);
+            top: -10%;
+            left: -10%;
+        }
+
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.15) 0%, transparent 70%);
+            bottom: -20%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(50px, 50px) scale(1.1); }
+            100% { transform: translate(-30px, 80px) scale(0.9); }
+        }
+
+        /* Glassmorphism Card */
+        .login-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUpFade {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .login-header h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header h2 span {
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Input Fields */
+        .input-group {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px 0;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group label {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            color: var(--text-muted);
+            font-size: 1rem;
+            pointer-events: none;
+            transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1) all;
+        }
+
+        .focus-border {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1) all;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+        }
+
+        .input-group input:focus ~ label,
+        .input-group input:not(:placeholder-shown) ~ label {
+            top: -20px;
+            font-size: 0.8rem;
+            color: var(--primary);
+        }
+
+        .input-group input:focus ~ .focus-border {
+            width: 100%;
+        }
+
+        /* Password Toggle */
+        .toggle-password {
+            position: absolute;
+            right: 0;
+            top: 10px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .toggle-password:hover {
+            color: var(--primary);
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .remember-me input {
+            display: none;
+        }
+
+        .checkmark {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--text-muted);
+            border-radius: 4px;
+            margin-right: 8px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .remember-me input:checked ~ .checkmark {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+        }
+
+        .remember-me input:checked ~ .checkmark::after {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 1px;
+            width: 3px;
+            height: 8px;
+            border: solid var(--bg-dark);
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .forgot-password {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .forgot-password:hover {
+            color: var(--primary);
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: var(--primary);
+            transition: all 0.3s ease;
+            z-index: -1;
+        }
+
+        .submit-btn:hover::before {
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            color: var(--bg-dark);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+        }
+
+        /* Footer */
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .login-footer a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .login-footer a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+
+    <div class="login-container">
+        <div class="login-header">
+            <h2>Welcome to <span>Nexus</span></h2>
+            <p>Enter your credentials to access the portal.</p>
+        </div>
+
+        <form class="login-form" id="loginForm">
+            <div class="input-group">
+                <input type="email" id="email" required autocomplete="off" placeholder=" ">
+                <label for="email">Email Address</label>
+                <span class="focus-border"></span>
+            </div>
+
+            <div class="input-group">
+                <input type="password" id="password" required placeholder=" ">
+                <label for="password">Password</label>
+                <span class="focus-border"></span>
+                <button type="button" class="toggle-password" id="togglePassword" aria-label="Toggle password visibility">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+            </div>
+
+            <div class="form-actions">
+                <label class="remember-me">
+                    <input type="checkbox">
+                    <span class="checkmark"></span>
+                    Remember me
+                </label>
+                <a href="#" class="forgot-password">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="submit-btn">Initialize Session</button>
+        </form>
+
+        <div class="login-footer">
+            <p>Don't have an access key? <a href="#">Request one</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            const loginForm = document.getElementById('loginForm');
+            const submitBtn = document.querySelector('.submit-btn');
+
+            // Toggle Password Visibility
+            togglePassword.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                const svg = togglePassword.querySelector('svg');
+                if (type === 'text') {
+                    svg.style.stroke = 'var(--primary)';
+                } else {
+                    svg.style.stroke = 'currentColor';
+                }
+            });
+
+            // Form submission animation logic
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault(); 
+                
+                const originalText = submitBtn.innerText;
+                submitBtn.innerText = 'Authenticating...';
+                submitBtn.style.pointerEvents = 'none';
+                
+                setTimeout(() => {
+                    submitBtn.innerText = 'Access Granted';
+                    submitBtn.style.backgroundColor = '#00f0ff';
+                    submitBtn.style.color = '#0a0a10';
+                    
+                    setTimeout(() => {
+                        submitBtn.innerText = originalText;
+                        submitBtn.style.backgroundColor = 'transparent';
+                        submitBtn.style.color = 'var(--primary)';
+                        submitBtn.style.pointerEvents = 'auto';
+                        loginForm.reset();
+                    }, 2000);
+                    
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html>
