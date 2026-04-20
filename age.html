@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mystic Age Guesser</title>
+    <style>
+        /* === Base Styling & Animated Background === */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* === Glassmorphism Container === */
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: all 0.5s ease;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        /* === Month Grid & Hover Effects === */
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .month-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .month-btn:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 15px rgba(255,255,255,0.4);
+        }
+
+        .month-btn.selected {
+            background: white;
+            color: #e73c7e;
+            font-weight: bold;
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(255,255,255,0.6);
+        }
+
+        /* === Primary Action Button === */
+        .guess-btn {
+            background: linear-gradient(90deg, #ff8a00, #e52e71);
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .guess-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(229, 46, 113, 0.8);
+        }
+
+        .guess-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* === Animations for Result Phase === */
+        .loader {
+            display: none;
+            margin: 20px auto;
+            border: 5px solid rgba(255,255,255,0.2);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #result-area {
+            display: none;
+            margin-top: 20px;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        #result-text {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="main-container">
+        <h1>Mystic Age Guesser</h1>
+        <p class="subtitle">Select your birth month and let the stars reveal your true age...</p>
+
+        <div class="month-grid" id="month-grid">
+            <button class="month-btn" data-month="January">January</button>
+            <button class="month-btn" data-month="February">February</button>
+            <button class="month-btn" data-month="March">March</button>
+            <button class="month-btn" data-month="April">April</button>
+            <button class="month-btn" data-month="May">May</button>
+            <button class="month-btn" data-month="June">June</button>
+            <button class="month-btn" data-month="July">July</button>
+            <button class="month-btn" data-month="August">August</button>
+            <button class="month-btn" data-month="September">September</button>
+            <button class="month-btn" data-month="October">October</button>
+            <button class="month-btn" data-month="November">November</button>
+            <button class="month-btn" data-month="December">December</button>
+        </div>
+
+        <button class="guess-btn" id="guess-btn">Guess My Age!</button>
+
+        <div class="loader" id="loader"></div>
+
+        <div id="result-area">
+            <div id="result-text"></div>
+            <p>Okay, we can't actually guess your age from a month. But you definitely have the soul of a <span id="soul-age"></span> year old!</p>
+            <button class="month-btn" onclick="location.reload()" style="margin-top: 20px;">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const monthBtns = document.querySelectorAll('.month-btn');
+            const guessBtn = document.getElementById('guess-btn');
+            const monthGrid = document.getElementById('month-grid');
+            const loader = document.getElementById('loader');
+            const resultArea = document.getElementById('result-area');
+            const resultText = document.getElementById('result-text');
+            const soulAgeText = document.getElementById('soul-age');
+            const subtitle = document.querySelector('.subtitle');
+
+            let selectedMonth = '';
+
+            // Handle Month Selection
+            monthBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // Remove selected class from all
+                    monthBtns.forEach(b => b.classList.remove('selected'));
+                    // Add to clicked
+                    e.target.classList.add('selected');
+                    selectedMonth = e.target.getAttribute('data-month');
+                });
+            });
+
+            // Handle Guess Button Click
+            guessBtn.addEventListener('click', () => {
+                if (!selectedMonth) {
+                    alert('Please select your birth month first!');
+                    return;
+                }
+
+                // UI Transition to Loading State
+                monthGrid.classList.add('hidden');
+                guessBtn.classList.add('hidden');
+                subtitle.innerText = `Analyzing the cosmic energy of ${selectedMonth}...`;
+                loader.style.display = 'block';
+
+                // Simulate processing time (2.5 seconds)
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    subtitle.classList.add('hidden');
+                    
+                    // Generate a completely random, funny age
+                    const randomAge = Math.floor(Math.random() * (120 - 5 + 1)) + 5; 
+                    
+                    // Display results
+                    resultText.innerHTML = `You give off heavy <strong>${selectedMonth}</strong> energy.<br>I'm guessing you're ${randomAge} years old!`;
+                    soulAgeText.innerText = randomAge;
+                    resultArea.style.display = 'block';
+                }, 2500);
+            });
+        });
+    </script>
+
+</body>
+</html>
