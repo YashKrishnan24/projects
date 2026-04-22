@@ -37,15 +37,18 @@ public class SupermarketBillingSystem extends JFrame {
         productPrices.put("Premium Biscuits", 40.0);
         productPrices.put("Bath Soap", 35.0);
 
-        buildHeader();
-        buildInputPanel();
-        buildTable();
-        buildFooter();
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.add(createHeader(), BorderLayout.NORTH);
+        topPanel.add(createInputPanel(), BorderLayout.CENTER);
+        
+        add(topPanel, BorderLayout.NORTH);
+        add(createTable(), BorderLayout.CENTER);
+        add(createFooter(), BorderLayout.SOUTH);
 
         updatePrice();
     }
 
-    private void buildHeader() {
+    private JPanel createHeader() {
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(new Color(41, 128, 185));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
@@ -55,10 +58,10 @@ public class SupermarketBillingSystem extends JFrame {
         headerLabel.setForeground(Color.WHITE);
         headerPanel.add(headerLabel);
         
-        add(headerPanel, BorderLayout.NORTH);
+        return headerPanel;
     }
 
-    private void buildInputPanel() {
+    private JPanel createInputPanel() {
         JPanel topContainer = new JPanel(new BorderLayout());
         topContainer.setOpaque(false);
 
@@ -78,7 +81,6 @@ public class SupermarketBillingSystem extends JFrame {
         quantityField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
         JButton addButton = createStyledButton("Add Item", new Color(39, 174, 96));
-        addButton.setIcon(UIManager.getIcon("Tree.leafIcon"));
 
         inputPanel.add(new JLabel("Select Item:"));
         inputPanel.add(new JLabel("Unit Price (₹):"));
@@ -92,17 +94,14 @@ public class SupermarketBillingSystem extends JFrame {
 
         topContainer.add(inputPanel, BorderLayout.CENTER);
         topContainer.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
-        
-        JPanel combinedNorth = new JPanel(new BorderLayout());
-        combinedNorth.add(getComponent(0), BorderLayout.NORTH);
-        combinedNorth.add(topContainer, BorderLayout.CENTER);
-        add(combinedNorth, BorderLayout.NORTH);
 
         itemBox.addActionListener(e -> updatePrice());
         addButton.addActionListener(e -> addItem());
+
+        return topContainer;
     }
 
-    private void buildTable() {
+    private JScrollPane createTable() {
         model = new DefaultTableModel(new String[]{"Item Name", "Price (₹)", "Quantity", "Total (₹)"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -126,10 +125,11 @@ public class SupermarketBillingSystem extends JFrame {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         scrollPane.getViewport().setBackground(Color.WHITE);
-        add(scrollPane, BorderLayout.CENTER);
+        
+        return scrollPane;
     }
 
-    private void buildFooter() {
+    private JPanel createFooter() {
         JPanel bottomPanel = new JPanel(new BorderLayout(10, 10));
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 15, 10));
         bottomPanel.setOpaque(false);
@@ -165,11 +165,11 @@ public class SupermarketBillingSystem extends JFrame {
         bottomPanel.add(summaryPanel, BorderLayout.WEST);
         bottomPanel.add(buttonPanel, BorderLayout.EAST);
 
-        add(bottomPanel, BorderLayout.SOUTH);
-
         removeButton.addActionListener(e -> removeItem());
         clearButton.addActionListener(e -> clearAll());
         billButton.addActionListener(e -> generateBill());
+
+        return bottomPanel;
     }
 
     private JButton createStyledButton(String text, Color color) {
